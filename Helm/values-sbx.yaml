@@ -181,7 +181,9 @@ labelsEnableDefault: true
 lifecycle: {}
 
 # Environment variables (for globals, all deployments)
-globalEnvs: []
+globalEnvs:
+  - name: DEVICE_DB_PATH
+    value: "/tmp/iot-agent-device-db"
 
 # Secondary environment variables (for globals, all deployments, to help with multi-inheritance)
 globalEnvsSecondary: []

@@ -4,12 +4,25 @@ server:
 spring:
   application:
     name: iot-agent-device-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://iot-agent-database:5432/iot_agent}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:gte}
+    password: ${SPRING_DATASOURCE_PASSWORD:gte}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always

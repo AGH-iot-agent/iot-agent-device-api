@@ -1,24 +1,26 @@
 package io.agh.iot.device.controller;
 
 import io.agh.iot.device.model.Device;
+import io.agh.iot.device.service.DeviceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/devices")
 public class DeviceController {
 
-    private final Map<String, Device> devices = new ConcurrentHashMap<>();
+    private final DeviceService deviceService;
+
+    public DeviceController(DeviceService deviceService) {
+        this.deviceService = deviceService;
+    }
 
     @GetMapping
-    public List<Device> getAllDevices() {
-        return new ArrayList<>(devices.values());
+    public List<Device> getAllDevices(@RequestParam(required = false) String status) {
+        return deviceService.findAllByStatus(status);
     }
 
     @PostMapping
@@ -26,13 +28,30 @@ public class DeviceController {
         if (device.getId() == null || device.getId().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        devices.put(device.getId(), device);
-        return ResponseEntity.status(HttpStatus.CREATED).body(device);
+
+        Device savedDevice = deviceService.save(device);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDevice);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Device> getDevice(@PathVariable String id) {
-        Device device = devices.get(id);
-        return device != null ? ResponseEntity.ok(device) : ResponseEntity.notFound().build();
+        return deviceService.findById(id)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Device> updateDevice(@PathVariable String id, @RequestBody Device device) {
+        return deviceService.update(id, device)
+            .map(updated -> ResponseEntity.ok(deviceService.save(updated)))
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDevice(@PathVariable String id) {
+        if (!deviceService.deleteById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 }
