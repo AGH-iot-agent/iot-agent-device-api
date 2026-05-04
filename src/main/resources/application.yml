@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://iot-agent-authentication:8080/.well-known/jwks.json
+  application:
+    name: iot-agent-device-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://iot-agent-database:5432/iot_agent}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:gte}
+    password: ${SPRING_DATASOURCE_PASSWORD:gte}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
